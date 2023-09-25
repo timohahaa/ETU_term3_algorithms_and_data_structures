@@ -2,7 +2,7 @@ package lds
 
 import "testing"
 
-func TestGet(t *testing.T) {
+func TestGetDLL(t *testing.T) {
 	l := NewDLList[int]()
 	_, err := l.Get(228)
 	if err == nil {
@@ -15,7 +15,7 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestDeleteDLL(t *testing.T) {
 	l := NewDLList[int]()
 	l.AddTail(8)
 	l.AddTail(9)

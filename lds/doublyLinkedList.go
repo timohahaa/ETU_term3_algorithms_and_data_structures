@@ -36,7 +36,7 @@ func (l *list[T]) Tail() *node[T] {
 func (l *list[T]) Get(idx int) (*node[T], error) {
 	cur := l.head
 	if idx >= l.len || idx < 0 {
-		return nil, errors.New("index of range")
+		return nil, errors.New("index out of range")
 	}
 	for i := 0; i < idx; i++ {
 		cur = cur.next
@@ -134,6 +134,7 @@ func (l *list[T]) DeleteTail(data T) {
 func (l *list[T]) Print() {
 	cur := l.head
 	for cur != nil {
-		fmt.Printf("%v+ -> ", cur.Val)
+		fmt.Printf("%+v -> ", cur.Val)
+		cur = cur.next
 	}
 }
