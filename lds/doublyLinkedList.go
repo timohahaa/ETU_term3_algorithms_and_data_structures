@@ -1,4 +1,4 @@
-package lds // list data structures
+package lds // List data structures
 
 import (
 	"errors"
@@ -11,29 +11,29 @@ type node[T any] struct {
 	prev *node[T]
 }
 
-type list[T any] struct {
+type List[T any] struct {
 	len  int
 	head *node[T]
 	tail *node[T]
 }
 
-func NewDLList[T any]() *list[T] {
-	return &list[T]{0, nil, nil}
+func NewDLList[T any]() *List[T] {
+	return &List[T]{0, nil, nil}
 }
 
-func (l *list[T]) Len() int {
+func (l *List[T]) Len() int {
 	return l.len
 }
 
-func (l *list[T]) Head() *node[T] {
+func (l *List[T]) Head() *node[T] {
 	return l.head
 }
 
-func (l *list[T]) Tail() *node[T] {
+func (l *List[T]) Tail() *node[T] {
 	return l.tail
 }
 
-func (l *list[T]) Get(idx int) (*node[T], error) {
+func (l *List[T]) Get(idx int) (*node[T], error) {
 	cur := l.head
 	if idx >= l.len || idx < 0 {
 		return nil, errors.New("index out of range")
@@ -45,13 +45,13 @@ func (l *list[T]) Get(idx int) (*node[T], error) {
 }
 
 // if index is out of range, this function does nothing
-func (l *list[T]) Add(idx int, data T) {
+func (l *List[T]) Add(idx int, data T) {
 	node := &node[T]{data, nil, nil}
 	if idx > l.len || idx < 0 {
 		// do nothing
 		return
 	}
-	// check if list is not empty
+	// check if List is not empty
 	if l.head == nil {
 		l.head = node
 		l.tail = node
@@ -84,7 +84,7 @@ func (l *list[T]) Add(idx int, data T) {
 }
 
 // if index is out of range, this function does nothing
-func (l *list[T]) Delete(idx int) {
+func (l *List[T]) Delete(idx int) {
 	if idx >= l.len || idx < 0 {
 		// do nothing
 		return
@@ -115,23 +115,23 @@ func (l *list[T]) Delete(idx int) {
 	l.len--
 }
 
-func (l *list[T]) AddHead(data T) {
+func (l *List[T]) AddHead(data T) {
 	l.Add(0, data)
 }
 
-func (l *list[T]) AddTail(data T) {
+func (l *List[T]) AddTail(data T) {
 	l.Add(l.len, data)
 }
 
-func (l *list[T]) DeleteHead(data T) {
+func (l *List[T]) DeleteHead(data T) {
 	l.Delete(0)
 }
 
-func (l *list[T]) DeleteTail(data T) {
+func (l *List[T]) DeleteTail(data T) {
 	l.Delete(l.len - 1)
 }
 
-func (l *list[T]) Print() {
+func (l *List[T]) Print() {
 	cur := l.head
 	for cur != nil {
 		fmt.Printf("%+v -> ", cur.Val)

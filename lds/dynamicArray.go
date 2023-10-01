@@ -10,29 +10,29 @@ const (
 )
 
 // how dumb it is to write a dynamic array in a language, that has slices...?))
-type dynamicArray[T any] struct {
+type DynamicArray[T any] struct {
 	arr []T
 	len int
 	cap int
 }
 
-func NewDArray[T any]() *dynamicArray[T] {
-	return &dynamicArray[T]{
+func NewDArray[T any]() *DynamicArray[T] {
+	return &DynamicArray[T]{
 		arr: make([]T, initCapacity),
 		len: 0,
 		cap: 10,
 	}
 }
 
-func (a *dynamicArray[T]) Len() int {
+func (a *DynamicArray[T]) Len() int {
 	return a.len
 }
 
-func (a *dynamicArray[T]) Cap() int {
+func (a *DynamicArray[T]) Cap() int {
 	return a.cap
 }
 
-func (a *dynamicArray[T]) EnsureCapacity(newCap int) {
+func (a *DynamicArray[T]) EnsureCapacity(newCap int) {
 	if a.cap >= newCap {
 		return
 	}
@@ -44,7 +44,7 @@ func (a *dynamicArray[T]) EnsureCapacity(newCap int) {
 	a.cap = newCap
 }
 
-func (a *dynamicArray[T]) Get(idx int) (T, error) {
+func (a *DynamicArray[T]) Get(idx int) (T, error) {
 	var zeroVal T
 	if idx >= a.len || idx < 0 {
 		return zeroVal, errors.New("index out of range")
@@ -53,7 +53,7 @@ func (a *dynamicArray[T]) Get(idx int) (T, error) {
 }
 
 // if index is out of range, this function does nothing
-func (a *dynamicArray[T]) Add(idx int, data T) {
+func (a *DynamicArray[T]) Add(idx int, data T) {
 	if idx > a.len || idx < 0 {
 		return
 	}
@@ -78,7 +78,7 @@ func (a *dynamicArray[T]) Add(idx int, data T) {
 }
 
 // if index is out of range, this function does nothing
-func (a *dynamicArray[T]) Delete(idx int) {
+func (a *DynamicArray[T]) Delete(idx int) {
 	if idx >= a.len || idx < 0 {
 		return
 	}
@@ -86,11 +86,11 @@ func (a *dynamicArray[T]) Delete(idx int) {
 	a.len--
 }
 
-func (a *dynamicArray[T]) PushBack(data T) {
+func (a *DynamicArray[T]) PushBack(data T) {
 	a.Add(a.len, data)
 }
 
-func (a *dynamicArray[T]) Print() {
+func (a *DynamicArray[T]) Print() {
 	for i, val := range a.arr {
 		fmt.Printf("[%v]: %+v\n", i, val)
 	}
