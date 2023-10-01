@@ -28,3 +28,7 @@ func (s *Stack[T]) Peek() T {
 func (s *Stack[T]) Empty() bool {
 	return len(s.arr) == 0
 }
+
+func (s *Stack[T]) Len() int {
+	return len(s.arr)
+}
