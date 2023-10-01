@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"lds"
+	"github.com/timohahaa/ETU_term3_algorithms_and_data_structures/lds"
 	"log"
 )
 
@@ -14,8 +14,10 @@ func main() {
 	//	l.Print()
 
 	str, err := lds.SortingStation("test.txt")
+
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	fmt.Println(str)
 }
