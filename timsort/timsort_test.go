@@ -1,6 +1,9 @@
 package timsort
 
-import "testing"
+import (
+	"math/rand"
+	"testing"
+)
 
 func arraysAreEqual(a, b []int) bool {
 	if len(a) != len(b) {
@@ -27,6 +30,26 @@ func TestInsertionSort(t *testing.T) {
 		return 0
 	})
 	if !arraysAreEqual(arr, need) {
-		t.Errorf("the array was not sorted right.\n need: %v, got: %v", arr, need)
+		t.Errorf("the array was not sorted right.\n need: %v\n got: %v", arr, need)
+	}
+}
+
+func TestTimSort(t *testing.T) {
+	arr := rand.Perm(1000)
+	need := make([]int, 0, 1000)
+	for i := range arr {
+		need = append(need, i)
+	}
+	TimSort[int](arr, func(a, b int) int {
+		if a < b {
+			return -1
+		}
+		if a > b {
+			return 1
+		}
+		return 0
+	})
+	if !arraysAreEqual(arr, need) {
+		t.Errorf("the array was not sorted right.\n need: %v\n got: %v", arr, need)
 	}
 }
