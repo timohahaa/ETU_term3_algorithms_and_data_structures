@@ -34,6 +34,24 @@ func TestInsertionSort(t *testing.T) {
 	}
 }
 
+func TestBSLowerBound(t *testing.T) {
+	cmp := func(a, b int) int {
+		if a > b {
+			return 1
+		}
+		if a < b {
+			return -1
+		}
+		return 0
+	}
+	arr := []int{-7, -4, 3, 4, 9, 9, 12}
+	expect := 4
+	got := binarySearchLowerBound[int](arr, cmp, 9)
+	if got != expect {
+		t.Errorf("did not find expected index. Got: %v, expected: %v", got, expect)
+	}
+}
+
 func TestTimSort(t *testing.T) {
 	arr := rand.Perm(1000)
 	need := make([]int, 0, 1000)

@@ -3,6 +3,8 @@ package main
 import (
 	//	"fmt"
 
+	"fmt"
+
 	"github.com/timohahaa/ETU_term3_algorithms_and_data_structures/timsort"
 )
 
@@ -11,5 +13,8 @@ func main() {
 	//	var size int
 	//	fmt.Print("size of an array to test on: ")
 	//	fmt.Scanln(&size)
-	timsort.Test(200)
+	for i := 1; i <= 10; i++ {
+		timsort.Test(i * 100)
+		fmt.Println()
+	}
 }

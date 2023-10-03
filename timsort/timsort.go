@@ -50,17 +50,76 @@ func insertionSort[T any](arr []T, left, right int, cmp func(a, b T) int) {
 	}
 }
 
+func binarySearchLowerBound[T any](arr []T, cmp func(a, b T) int, target T) int {
+	low, high := 0, len(arr)
+	for low < high {
+		mid := (low + high) / 2
+		if cmp(arr[mid], target) >= 0 {
+			high = mid
+		} else {
+			low = mid + 1
+		}
+	}
+	if low < len(arr) { // && cmp(arr[low], target) == 0 {
+		return low
+	}
+	return -1
+}
+
 // merges two sorted slices into one
+// uses galloping for perfomance boost
 func merge[T any](left, right []T, cmp func(a, b T) int) []T {
+	//fmt.Println()
+	//fmt.Println(left, right)
+	//fmt.Println()
 	merged := make([]T, 0, len(left)+len(right))
 	l, r := 0, 0
+	countGallop := 0
 	for l != len(left) && r != len(right) {
-		if cmp(left[l], right[r]) < 0 {
+		if countGallop == gallopingParam {
+			idx := binarySearchLowerBound[T](left, cmp, right[r])
+			if idx == -1 {
+				for l != len(left) {
+					merged = append(merged, left[l])
+					l++
+				}
+			} else {
+				for l != idx {
+					merged = append(merged, left[l])
+					l++
+				}
+			}
+			countGallop = 0
+		} else if countGallop == -gallopingParam {
+			idx := binarySearchLowerBound[T](right, cmp, left[l])
+			if idx == -1 {
+				for r != len(right) {
+					merged = append(merged, right[r])
+					r++
+				}
+			} else {
+				for r != idx {
+					merged = append(merged, right[r])
+					r++
+				}
+			}
+			countGallop = 0
+		} else if cmp(left[l], right[r]) < 0 {
 			merged = append(merged, left[l])
 			l++
+			if countGallop >= 0 {
+				countGallop++
+			} else {
+				countGallop = 0
+			}
 		} else {
 			merged = append(merged, right[r])
 			r++
+			if countGallop <= 0 {
+				countGallop--
+			} else {
+				countGallop = 0
+			}
 		}
 	}
 	for l != len(left) {
@@ -243,7 +302,9 @@ func Test(size int) {
 	})
 	after := time.Now()
 	if !equal(arr, need) {
-		fmt.Println("didnt pass")
+		fmt.Println("didnt pass the test")
+	} else {
+		fmt.Println("test passed")
 	}
 	//	fmt.Println("after:")
 	//	fmt.Printf("arr: %v\nneed: %v\n", arr, need)
