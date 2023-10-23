@@ -7,14 +7,14 @@ package trees
 // if a = b, cmp(a,b) = 0
 
 type BinaryTreeNode[T any] struct {
-	val   T
+	Val   T
 	right *BinaryTreeNode[T]
 	left  *BinaryTreeNode[T]
 }
 
 func newBTNode[T any](val T) *BinaryTreeNode[T] {
 	n := &BinaryTreeNode[T]{
-		val:   val,
+		Val:   val,
 		right: nil,
 		left:  nil,
 	}
@@ -43,7 +43,7 @@ func (t *BinaryTree[T]) inorder(arr *[]T, root *BinaryTreeNode[T]) {
 		return
 	}
 	t.inorder(arr, root.left)
-	*arr = append(*arr, root.val)
+	*arr = append(*arr, root.Val)
 	t.inorder(arr, root.right)
 }
 
@@ -57,7 +57,7 @@ func (t *BinaryTree[T]) preorder(arr *[]T, root *BinaryTreeNode[T]) {
 	if root == nil {
 		return
 	}
-	*arr = append(*arr, root.val)
+	*arr = append(*arr, root.Val)
 	t.preorder(arr, root.left)
 	t.preorder(arr, root.right)
 }
@@ -74,7 +74,7 @@ func (t *BinaryTree[T]) postorder(arr *[]T, root *BinaryTreeNode[T]) {
 	}
 	t.postorder(arr, root.left)
 	t.postorder(arr, root.right)
-	*arr = append(*arr, root.val)
+	*arr = append(*arr, root.Val)
 }
 
 func (t *BinaryTree[T]) PostorderTraversal() []T {
@@ -96,7 +96,7 @@ func (t *BinaryTree[T]) LevelOrderTraversal() [][]T {
 		for i := 0; i < levelLen; i++ {
 			node := queue[0]
 			queue = queue[1:] // pop from queue
-			level = append(level, node.val)
+			level = append(level, node.Val)
 			// add node's children to the queue
 			if node.left != nil {
 				queue = append(queue, node.left)
@@ -130,7 +130,7 @@ func (t *BinaryTree[T]) search(root *BinaryTreeNode[T], elem T) *BinaryTreeNode[
 		return nil
 	}
 
-	if t.cmp(root.val, elem) == 0 {
+	if t.cmp(root.Val, elem) == 0 {
 		return root
 	}
 
@@ -196,7 +196,7 @@ func (t *BinaryTree[T]) Delete(elem T) {
 		cur = cur.right
 	}
 	// swap the data
-	elemPtr.val, cur.val = cur.val, elemPtr.val
+	elemPtr.Val, cur.Val = cur.Val, elemPtr.Val
 	// delete the node
 	prev.right = nil
 }
