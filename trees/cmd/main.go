@@ -27,9 +27,15 @@ func main() {
 	for _, level := range levels {
 		fmt.Println(level)
 	}
-
-	inorder := t.InorderTraversal()
-	fmt.Println(inorder)
-
+	fmt.Println()
+	fmt.Println(t.InorderTraversal())
+	fmt.Println()
+	fmt.Println(t.PreorderTraversal())
+	fmt.Println()
+	fmt.Println(t.PostorderTraversal())
+	fmt.Println()
+	fmt.Println(t.PostorderTraversalRecursionless())
+	fmt.Println()
 	t.PrintTree()
+
 }

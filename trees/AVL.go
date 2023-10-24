@@ -1,6 +1,10 @@
 package trees
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/timohahaa/ETU_term3_algorithms_and_data_structures/lds"
+)
 
 // the T type is litteraly anything
 // provide a cmp(a, b T) int func when creating a tree, such that:
@@ -234,6 +238,30 @@ func (t *AVLTree[T]) InorderTraversal() []T {
 	return traversalArr
 }
 
+func (t *AVLTree[T]) InorderTraversalRecursionless() []T {
+	if t.root == nil {
+		return []T(nil)
+	}
+	ans := make([]T, 0)
+	stack := lds.NewStack[*AVLNode[T]]()
+	current := t.root
+	stack.Push(current)
+	current = current.left
+	for {
+		if current != nil {
+			stack.Push(current)
+			current = current.left
+		} else if !stack.Empty() {
+			current = stack.Pop()
+			ans = append(ans, current.Val)
+			current = current.right
+		} else {
+			break
+		}
+	}
+	return ans
+}
+
 func (t *AVLTree[T]) preorder(arr *[]T, root *AVLNode[T]) {
 	if root == nil {
 		return
@@ -247,6 +275,26 @@ func (t *AVLTree[T]) PreorderTraversal() []T {
 	traversalArr := make([]T, 0)
 	t.preorder(&traversalArr, t.root)
 	return traversalArr
+}
+
+func (t *AVLTree[T]) PreorderTraversalRecursionless() []T {
+	if t.root == nil {
+		return []T(nil)
+	}
+	ans := make([]T, 0)
+	stack := lds.NewStack[*AVLNode[T]]()
+	stack.Push(t.root)
+	for !stack.Empty() {
+		node := stack.Pop()
+		ans = append(ans, node.Val)
+		if node.right != nil {
+			stack.Push(node.right)
+		}
+		if node.left != nil {
+			stack.Push(node.left)
+		}
+	}
+	return ans
 }
 
 func (t *AVLTree[T]) postorder(arr *[]T, root *AVLNode[T]) {
@@ -263,6 +311,66 @@ func (t *AVLTree[T]) PostorderTraversal() []T {
 	t.postorder(&traversalArr, t.root)
 	return traversalArr
 }
+
+// https://stackoverflow.com/questions/1294701/post-order-traversal-of-binary-tree-without-recursion
+func (t *AVLTree[T]) PostorderTraversalRecursionless() []T {
+	if t.root == nil {
+		return []T(nil)
+	}
+	type State int
+	const (
+		Left  State = 0
+		Right State = 1
+		Curr  State = 2
+		Up    State = 3
+	)
+	ans := make([]T, 0)
+	stack := lds.NewStack[*AVLNode[T]]()
+	current := t.root
+	var state State = Left
+
+	for !(current == t.root && state == Up) {
+		switch state {
+		case Left:
+			// if left node exists - try left again
+			// else try right
+			if current.left != nil {
+				stack.Push(current)
+				current = current.left
+			} else {
+				state = Right
+			}
+		case Right:
+			// if roght node exists try left
+			// if no right node then current is a leaf - try curr
+			if current.right != nil {
+				stack.Push(current)
+				current = current.right
+				state = Left
+			} else {
+				state = Curr
+			}
+		case Curr:
+			// visit current node, all nodes below have been visited, so move up
+			ans = append(ans, current.Val)
+			state = Up
+			// but don't change current ptr !!!
+		case Up:
+			// if node is root, can't go up, so exit
+			// if came from left, try right
+			// if came from right, try curr
+			child := current
+			current = stack.Pop()
+			if current.left == child {
+				state = Right
+			} else {
+				state = Curr
+			}
+		}
+	}
+	return ans
+}
+
 func (t *AVLTree[T]) print(root *AVLNode[T], indent string, last bool) {
 	if root != nil {
 		fmt.Print(indent)
