@@ -52,6 +52,12 @@ func (a *DynamicArray[T]) Get(idx int) (T, error) {
 	return a.arr[idx], nil
 }
 
+// get method, that returns no error
+// panics at an invalid index
+func (a *DynamicArray[T]) GetNoError(idx int) T {
+	return a.arr[idx]
+}
+
 // if index is out of range, this function does nothing
 func (a *DynamicArray[T]) Add(idx int, data T) {
 	if idx > a.len || idx < 0 {
