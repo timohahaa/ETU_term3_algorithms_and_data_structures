@@ -58,6 +58,13 @@ func (a *DynamicArray[T]) GetNoError(idx int) T {
 	return a.arr[idx]
 }
 
+func (a *DynamicArray[T]) Set(idx int, data T) {
+	if idx >= a.len || idx < 0 {
+		return
+	}
+	a.arr[idx] = data
+}
+
 // if index is out of range, this function does nothing
 func (a *DynamicArray[T]) Add(idx int, data T) {
 	if idx > a.len || idx < 0 {
