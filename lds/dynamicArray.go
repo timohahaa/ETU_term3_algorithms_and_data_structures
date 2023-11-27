@@ -20,7 +20,7 @@ func NewDArray[T any]() *DynamicArray[T] {
 	return &DynamicArray[T]{
 		arr: make([]T, initCapacity),
 		len: 0,
-		cap: 10,
+		cap: initCapacity,
 	}
 }
 
@@ -36,12 +36,14 @@ func (a *DynamicArray[T]) EnsureCapacity(newCap int) {
 	if a.cap >= newCap {
 		return
 	}
-	// always grow by the factor of two
-	newArr := make([]T, newCap*2)
+	newArr := make([]T, newCap*2+1)
 	// can also do it by hand
-	copy(newArr, a.arr)
+	//	copy(newArr, a.arr)
+	for i := range a.arr {
+		newArr[i] = a.arr[i]
+	}
 	a.arr = newArr
-	a.cap = newCap
+	a.cap = newCap*2 + 1
 }
 
 func (a *DynamicArray[T]) Get(idx int) (T, error) {
@@ -53,9 +55,10 @@ func (a *DynamicArray[T]) Get(idx int) (T, error) {
 }
 
 // get method, that returns no error
-// panics at an invalid index
+// returns T(nil) at invalid index
 func (a *DynamicArray[T]) GetNoError(idx int) T {
-	return a.arr[idx]
+	val, _ := a.Get(idx)
+	return val
 }
 
 func (a *DynamicArray[T]) Set(idx int, data T) {

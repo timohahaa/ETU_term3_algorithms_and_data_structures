@@ -3,6 +3,8 @@ package timsort
 import (
 	"math/rand"
 	"testing"
+
+	"github.com/timohahaa/ETU_term3_algorithms_and_data_structures/lds"
 )
 
 func arraysAreEqual(a, b []int) bool {
@@ -20,7 +22,14 @@ func arraysAreEqual(a, b []int) bool {
 func TestInsertionSort(t *testing.T) {
 	arr := []int{4, 3, 2, 10, 12, 1, 5, 6}
 	need := []int{1, 2, 3, 4, 5, 6, 10, 12}
-	insertionSort[int](arr, 0, len(arr)-1, func(a, b int) int {
+	arrDA := lds.NewDArray[int]()
+	needDA := lds.NewDArray[int]()
+
+	for i := range arr {
+		needDA.PushBack(need[i])
+		arrDA.PushBack(arr[i])
+	}
+	insertionSort[int](arrDA, 0, len(arr)-1, func(a, b int) int {
 		if a > b {
 			return 1
 		}
@@ -29,8 +38,8 @@ func TestInsertionSort(t *testing.T) {
 		}
 		return 0
 	})
-	if !arraysAreEqual(arr, need) {
-		t.Errorf("the array was not sorted right.\n need: %v\n got: %v", arr, need)
+	if !Equal(arrDA, needDA) {
+		t.Errorf("the array was not sorted right.\n need: %v\n got: %v", *arrDA, *needDA)
 	}
 }
 
@@ -45,8 +54,13 @@ func TestBSLowerBound(t *testing.T) {
 		return 0
 	}
 	arr := []int{-7, -4, 3, 4, 9, 9, 12}
+	arrDA := lds.NewDArray[int]()
+	for i := range arr {
+		arrDA.PushBack(arr[i])
+	}
+
 	expect := 4
-	got := binarySearchLowerBound[int](arr, cmp, 9)
+	got := binarySearchLowerBound[int](arrDA, cmp, 9)
 	if got != expect {
 		t.Errorf("did not find expected index. Got: %v, expected: %v", got, expect)
 	}
@@ -54,11 +68,14 @@ func TestBSLowerBound(t *testing.T) {
 
 func TestTimSort(t *testing.T) {
 	arr := rand.Perm(1000)
-	need := make([]int, 0, 1000)
+	arrDA := lds.NewDArray[int]()
+	needDA := lds.NewDArray[int]()
+
 	for i := range arr {
-		need = append(need, i)
+		needDA.PushBack(i)
+		arrDA.PushBack(arr[i])
 	}
-	TimSort[int](arr, func(a, b int) int {
+	TimSort[int](arrDA, func(a, b int) int {
 		if a < b {
 			return -1
 		}
@@ -67,7 +84,7 @@ func TestTimSort(t *testing.T) {
 		}
 		return 0
 	})
-	if !arraysAreEqual(arr, need) {
-		t.Errorf("the array was not sorted right.\n need: %v\n got: %v", arr, need)
+	if !Equal(arrDA, needDA) {
+		t.Errorf("the array was not sorted right.\n need: %v\n got: %v", *arrDA, *needDA)
 	}
 }

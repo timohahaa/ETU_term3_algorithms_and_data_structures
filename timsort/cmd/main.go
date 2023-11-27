@@ -1,8 +1,6 @@
 package main
 
 import (
-	//	"fmt"
-
 	"fmt"
 
 	"github.com/timohahaa/ETU_term3_algorithms_and_data_structures/timsort"

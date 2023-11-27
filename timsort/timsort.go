@@ -35,32 +35,32 @@ func calcMinRun(size int) int {
 }
 
 // no need to use *[]T or return []T, because the function does not make make() calls under the hood
-func insertionSort[T any](arr []T, left, right int, cmp func(a, b T) int) {
+func insertionSort[T any](arr *lds.DynamicArray[T], left, right int, cmp func(a, b T) int) {
 	for i := left + 1; i < right+1; i++ {
-		valueToInsert := arr[i]
+		valueToInsert := arr.GetNoError(i)
 		for j := i - 1; j >= left; j-- {
-			if cmp(arr[j], valueToInsert) < 0 {
+			if cmp(arr.GetNoError(j), valueToInsert) < 0 {
 				// arr[j] < valueToInsert
 				break
 			}
 			// move the element
-			arr[j+1] = arr[j]
-			arr[j] = valueToInsert
+			arr.Set(j+1, arr.GetNoError(j))
+			arr.Set(j, valueToInsert)
 		}
 	}
 }
 
-func binarySearchLowerBound[T any](arr []T, cmp func(a, b T) int, target T) int {
-	low, high := 0, len(arr)
+func binarySearchLowerBound[T any](arr *lds.DynamicArray[T], cmp func(a, b T) int, target T) int {
+	low, high := 0, arr.Len()
 	for low < high {
 		mid := (low + high) / 2
-		if cmp(arr[mid], target) >= 0 {
+		if cmp(arr.GetNoError(mid), target) >= 0 {
 			high = mid
 		} else {
 			low = mid + 1
 		}
 	}
-	if low < len(arr) { // && cmp(arr[low], target) == 0 {
+	if low < arr.Len() { // && cmp(arr[low], target) == 0 {
 		return low
 	}
 	return -1
@@ -68,44 +68,42 @@ func binarySearchLowerBound[T any](arr []T, cmp func(a, b T) int, target T) int 
 
 // merges two sorted slices into one
 // uses galloping for perfomance boost
-func merge[T any](left, right []T, cmp func(a, b T) int) []T {
-	//fmt.Println()
-	//fmt.Println(left, right)
-	//fmt.Println()
-	merged := make([]T, 0, len(left)+len(right))
+func merge[T any](left, right *lds.DynamicArray[T], cmp func(a, b T) int) *lds.DynamicArray[T] {
+	merged := lds.NewDArray[T]()
+	//merged.EnsureCapacity(left.Len() + right.Len())
 	l, r := 0, 0
 	countGallop := 0
-	for l != len(left) && r != len(right) {
+	for l != left.Len() && r != right.Len() {
 		if countGallop == gallopingParam {
-			idx := binarySearchLowerBound[T](left, cmp, right[r])
+			idx := binarySearchLowerBound[T](left, cmp, right.GetNoError(r))
 			if idx == -1 {
-				for l != len(left) {
-					merged = append(merged, left[l])
+				for l != left.Len() {
+					merged.PushBack(left.GetNoError(l))
 					l++
 				}
 			} else {
 				for l != idx {
-					merged = append(merged, left[l])
+					merged.PushBack(left.GetNoError(l))
 					l++
 				}
 			}
 			countGallop = 0
 		} else if countGallop == -gallopingParam {
-			idx := binarySearchLowerBound[T](right, cmp, left[l])
+			idx := binarySearchLowerBound[T](right, cmp, left.GetNoError(l))
 			if idx == -1 {
-				for r != len(right) {
-					merged = append(merged, right[r])
+				for r != right.Len() {
+					merged.PushBack(right.GetNoError(r))
 					r++
 				}
 			} else {
 				for r != idx {
-					merged = append(merged, right[r])
+					merged.PushBack(right.GetNoError(r))
 					r++
 				}
 			}
 			countGallop = 0
-		} else if cmp(left[l], right[r]) < 0 {
-			merged = append(merged, left[l])
+		} else if cmp(left.GetNoError(l), right.GetNoError(r)) < 0 {
+			merged.PushBack(left.GetNoError(l))
 			l++
 			if countGallop >= 0 {
 				countGallop++
@@ -113,7 +111,7 @@ func merge[T any](left, right []T, cmp func(a, b T) int) []T {
 				countGallop = 0
 			}
 		} else {
-			merged = append(merged, right[r])
+			merged.PushBack(right.GetNoError(r))
 			r++
 			if countGallop <= 0 {
 				countGallop--
@@ -122,29 +120,32 @@ func merge[T any](left, right []T, cmp func(a, b T) int) []T {
 			}
 		}
 	}
-	for l != len(left) {
-		merged = append(merged, left[l])
+	for l != left.Len() {
+		merged.PushBack(left.GetNoError(l))
 		l++
 	}
-	for r != len(right) {
-		merged = append(merged, right[r])
+	for r != right.Len() {
+		merged.PushBack(right.GetNoError(r))
 		r++
 	}
 	return merged
 }
 
 // func to reverse "runs", that are in descending order
-func reverse[T any](arr []T) {
-	i, j := 0, len(arr)-1
+func reverse[T any](arr *lds.DynamicArray[T]) {
+	i, j := 0, arr.Len()-1
 	for i <= j {
-		arr[i], arr[j] = arr[j], arr[i]
+		tI := arr.GetNoError(i)
+		tJ := arr.GetNoError(j)
+		arr.Set(i, tJ)
+		arr.Set(j, tI)
 		i++
 		j--
 	}
 }
 
 // checks if the merge should be permormed and performs it
-func mergeIfNeeded[T any](runs *lds.Stack[[]T], cmp func(a, b T) int) {
+func mergeIfNeeded[T any](runs *lds.Stack[*lds.DynamicArray[T]], cmp func(a, b T) int) {
 	if runs.Len() < 2 {
 		return
 	}
@@ -159,122 +160,128 @@ func mergeIfNeeded[T any](runs *lds.Stack[[]T], cmp func(a, b T) int) {
 	Z := runs.Pop()
 	// reorders X, Y and Z in a right order
 	reorderXYZ := func() {
-		if len(X) > len(Z) {
+		if X.Len() > Z.Len() {
 			X, Z = Z, X
 		}
-		if len(Y) > len(Z) {
+		if Y.Len() > Z.Len() {
 			Y, Z = Z, Y
 		}
-		if len(Y) < len(X) {
+		if Y.Len() < X.Len() {
 			Y, X = X, Y
 		}
 	}
-	for !runs.Empty() && (len(Z) < len(X)+len(Y) || len(Y) < len(X)) {
-		if len(X) < len(Z) {
+	var XisNil, ZisNil = false, false
+	for !runs.Empty() && (Z.Len() < X.Len()+Y.Len() || Y.Len() < X.Len()) {
+		if X.Len() < Z.Len() {
 			Y = merge[T](X, Y, cmp)
 			if !runs.Empty() {
 				X = runs.Pop()
 			} else {
-				X = nil
+				XisNil = true
 			}
 		} else {
 			Y = merge[T](Z, Y, cmp)
 			if !runs.Empty() {
 				Z = runs.Pop()
 			} else {
-				Z = nil
+				ZisNil = true
 			}
 		}
 		reorderXYZ()
 	}
 	// from biggest to largest
-	if Z != nil {
+	if !ZisNil {
 		runs.Push(Z)
 	}
 	runs.Push(Y)
-	if X != nil {
+	if !XisNil {
 		runs.Push(X)
 	}
 }
 
 // no need to use *[]T or return []T, because the function does not make make() calls under the hood
-func TimSort[T any](arr []T, cmp func(a, b T) int) {
-	if len(arr) <= minimumMinRunSize {
-		insertionSort[T](arr, 0, len(arr)-1, cmp)
+func TimSort[T any](arr *lds.DynamicArray[T], cmp func(a, b T) int) {
+	if arr.Len() <= minimumMinRunSize {
+		insertionSort[T](arr, 0, arr.Len()-1, cmp)
 		return
 	}
 
-	minRun := calcMinRun(len(arr))
+	minRun := calcMinRun(arr.Len())
 	descendingFlag := false
 	// helper function to set descendingFlag
 	setFlag := func(i int) {
-		if cmp(arr[i], arr[i-1]) < 0 {
+		if cmp(arr.GetNoError(i), arr.GetNoError(i-1)) < 0 {
 			descendingFlag = true
 		} else {
 			descendingFlag = false
 		}
 	}
 	// find runs, add them to the stack, merge them if neccesary
-	runs := lds.NewStack[[]T]()
-	run := make([]T, 0, minRun)
+	runs := lds.NewStack[*lds.DynamicArray[T]]()
+	run := lds.NewDArray[T]()
+	//run.EnsureCapacity(minRun)
 	i := 2
-	run = append(run, arr[0], arr[1])
+	run.PushBack(arr.GetNoError(0))
+	run.PushBack(arr.GetNoError(1))
 	setFlag(1)
-	for i != len(arr) {
+	for i != arr.Len() {
 		if descendingFlag {
-			for i != len(arr) && cmp(arr[i], arr[i-1]) < 0 {
-				run = append(run, arr[i])
+			for i != arr.Len() && cmp(arr.GetNoError(i), arr.GetNoError(i-1)) < 0 {
+				run.PushBack(arr.GetNoError(i))
 				i++
 			}
 			// because the order is descending, reverse the run
 			reverse[T](run)
 			// if there are too little elements in a run, add them until there are minRun elements
-			for i != len(arr) && len(run) < minRun {
-				run = append(run, arr[i])
+			for i != arr.Len() && run.Len() < minRun {
+				run.PushBack(arr.GetNoError(i))
 				i++
 			}
 		} else {
-			for i != len(arr) && cmp(arr[i], arr[i-1]) >= 0 {
-				run = append(run, arr[i])
+			for i != arr.Len() && cmp(arr.GetNoError(i), arr.GetNoError(i-1)) >= 0 {
+				run.PushBack(arr.GetNoError(i))
 				i++
 			}
 			// if there are too little elements in a run, add them until there are minRun elements
-			for i != len(arr) && len(run) < minRun {
-				run = append(run, arr[i])
+			for i != arr.Len() && run.Len() < minRun {
+				run.PushBack(arr.GetNoError(i))
 				i++
 			}
 		}
 		// sort and push to stack
-		insertionSort[T](run, 0, len(run)-1, cmp)
+		insertionSort[T](run, 0, run.Len()-1, cmp)
 		runs.Push(run)
 		// realloc the run slice
-		run = make([]T, 0, minRun)
-		if i <= len(arr)-2 {
-			run = append(run, arr[i])
+		run = lds.NewDArray[T]()
+		//		run.EnsureCapacity(minRun)
+		if i <= arr.Len()-2 {
+			run.PushBack(arr.GetNoError(i))
 			i++
-			run = append(run, arr[i])
+			run.PushBack(arr.GetNoError(i))
 			setFlag(i)
 			i++
-		} else if i == len(arr)-1 {
-			runs.Push([]T{arr[len(arr)-i]})
+		} else if i == arr.Len()-1 {
+			lastRun := lds.NewDArray[T]()
+			lastRun.PushBack(arr.GetNoError(arr.Len() - 1))
+			runs.Push(lastRun)
 			i++
 		}
 		// now merge if needed
 		mergeIfNeeded[T](runs, cmp)
 	}
 	sorted := runs.Pop()
-	for i := range sorted {
-		arr[i] = sorted[i]
+	for i := 0; i < sorted.Len(); i++ {
+		arr.Set(i, sorted.GetNoError(i))
 	}
 }
 
 // functions test the sorting (show to teacher :))
-func equal(a, b []int) bool {
-	if len(a) != len(b) {
+func Equal(a, b *lds.DynamicArray[int]) bool {
+	if a.Len() != b.Len() {
 		return false
 	}
-	for i := range a {
-		if a[i] != b[i] {
+	for i := 0; i < a.Len(); i++ {
+		if a.GetNoError(i) != b.GetNoError(i) {
 			return false
 		}
 	}
@@ -282,14 +289,15 @@ func equal(a, b []int) bool {
 }
 
 func Test(size int) {
-	arr := rand.Perm(size)
-	need := make([]int, 0, size)
-	for i := range arr {
-		need = append(need, i)
+	perm := rand.Perm(size)
+	arr := lds.NewDArray[int]()
+	need := lds.NewDArray[int]()
+
+	for i := range perm {
+		need.PushBack(i)
+		arr.PushBack(perm[i])
 	}
 	fmt.Printf("testing timsort on an array of size %v\n", size)
-	//	fmt.Println("before:")
-	//	fmt.Printf("arr: %v\nneed: %v\n", arr, need)
 	before := time.Now()
 	TimSort[int](arr, func(a, b int) int {
 		if a < b {
@@ -301,12 +309,10 @@ func Test(size int) {
 		return 0
 	})
 	after := time.Now()
-	if !equal(arr, need) {
+	if !Equal(arr, need) {
 		fmt.Println("didnt pass the test")
 	} else {
 		fmt.Println("test passed")
 	}
-	//	fmt.Println("after:")
-	//	fmt.Printf("arr: %v\nneed: %v\n", arr, need)
 	fmt.Printf("time to sort an array of size %v: %v\n", size, time.Duration(after.Sub(before)))
 }
